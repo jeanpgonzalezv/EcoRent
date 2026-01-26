@@ -30,9 +30,13 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.material3.TextButton
 
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+
 @Composable
 fun ProductosScreen(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onArrendarHerramienta: (Long) -> Unit
 ) {
 
 
@@ -71,7 +75,8 @@ fun ProductosScreen(
 
             // Lista de herramientas
             items(herramientas) { herramienta ->
-                HerramientaCard(herramienta = herramienta)
+                HerramientaCard(herramienta = herramienta,
+                    onArrendarHerramienta = onArrendarHerramienta)
             }
 
             // Pie de página
@@ -104,7 +109,10 @@ fun ProductosScreen(
 
 // 3. Función REUTILIZABLE para mostrar cualquier herramienta
 @Composable
-fun HerramientaCard(herramienta: Herramienta) {
+fun HerramientaCard(
+    herramienta: Herramienta,
+    onArrendarHerramienta: (Long) -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -119,14 +127,14 @@ fun HerramientaCard(herramienta: Herramienta) {
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            // Nombre desde la colección
+            // Nombre
             Text(
                 text = herramienta.nombre,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold
             )
 
-            // Descripción desde la colección
+            // Descripción
             Text(
                 text = herramienta.descripcion,
                 fontSize = 14.sp,
@@ -141,7 +149,7 @@ fun HerramientaCard(herramienta: Herramienta) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Precio formateado desde función en data class
+                // Precio
                 Text(
                     text = herramienta.precioFormateado(),
                     fontSize = 16.sp,
@@ -149,7 +157,7 @@ fun HerramientaCard(herramienta: Herramienta) {
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                // Stock formateado desde función en data class
+                // Stock
                 Text(
                     text = herramienta.stockFormateado(),
                     fontSize = 12.sp,
@@ -161,7 +169,7 @@ fun HerramientaCard(herramienta: Herramienta) {
                 )
             }
 
-            // Opcional: Mostrar rating si existe
+            // Rating (si tiene)
             if (herramienta.rating > 0.0f) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
@@ -169,38 +177,51 @@ fun HerramientaCard(herramienta: Herramienta) {
                     fontSize = 11.sp,
                     color = Color(0xFFFF9800)
                 )
+            }
 
-                // AGREGAR AQUÍ: Mostrar enlace al fabricante si existe
-                if (herramienta.fabricanteUrl.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(8.dp))
+            // Botón Arrendar (SIEMPRE VISIBLE)
+            Spacer(modifier = Modifier.height(12.dp))
 
-                    val context = LocalContext.current
-
-                    TextButton(
-                        onClick = {
-                            // Abrir enlace en navegador
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(herramienta.fabricanteUrl))
-                            context.startActivity(intent)
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "🌐 Especificaciones técnicas",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+            Button(
+                onClick = { onArrendarHerramienta(herramienta.id) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = herramienta.disponible && herramienta.stock > 0,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (herramienta.disponible && herramienta.stock > 0) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
                     }
-                }
-
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Text(
-                    text = "Próximamente: Catálogo completo con Room",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
+            ) {
+                Text(
+                    text = if (herramienta.disponible && herramienta.stock > 0) {
+                        "🛒 Arrendar ahora"
+                    } else {
+                        "No disponible"
+                    }
+                )
+            }
+
+            // Enlace al fabricante (si tiene)
+            if (herramienta.fabricanteUrl.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                val context = LocalContext.current
+
+                TextButton(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(herramienta.fabricanteUrl))
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "🌐 Especificaciones técnicas",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }

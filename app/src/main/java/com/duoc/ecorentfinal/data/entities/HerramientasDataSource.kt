@@ -7,7 +7,7 @@ import com.duoc.ecorentfinal.data.model.Herramienta
 object HerramientasDataSource {
     val herramientas = listOf(
         Herramienta(
-            id = 1,
+            id = 1L,
             nombre = "Taladro Percutor 18V",
             descripcion = "Ideal para perforaciones en diferentes superficies",
             categoria = "Herramientas Eléctricas",
@@ -18,7 +18,7 @@ object HerramientasDataSource {
             fabricanteUrl ="https://www.sodimac.cl/sodimac-cl/articulo/140625674/taladro-percutor-inalambrico-13-mm-20-v-brushless1-bateria-2ahcargador25-acc/140625675?kid=goosho_373418&shop=googleShopping&gclsrc=aw.ds&gad_source=1&gad_campaignid=21443067527&gbraid=0AAAAADRw8zupl4EvtQPAzI-M4p92Agyak&gclid=CjwKCAiA7LzLBhAgEiwAjMWzCImBRC9hArglInfeTUHzsW7kWtJnQhpbE8lRby3FjiYXEZxEajolZBoC_18QAvD_BwE"
         ),
         Herramienta(
-            id = 2,
+            id = 2L,
             nombre = "Esmeril Eléctrico 7''",
             descripcion = "Para cortar y pulir metales. Potencia 2000W, velocidad 6000 RPM.",
             categoria = "Herramientas Eléctricas",
@@ -29,7 +29,7 @@ object HerramientasDataSource {
             fabricanteUrl ="https://pernoval.cl/productos/14245-esmeril_angular_7_2000w_ga7050_makita-088381606011.html?gad_source=1&gad_campaignid=22412650288&gbraid=0AAAAAphOZvsX5An0jqEcFCSAPaDsizEDZ&gclid=CjwKCAiA7LzLBhAgEiwAjMWzCEq83D3dNyb0TAQ2tSpJ_vDYAQEpsbqCv97T5QSg-x7a35AkmnnmKxoCIJEQAvD_BwE"
         ),
         Herramienta(
-            id = 3,
+            id = 3L,
             nombre = "Soldadora Inversora",
             descripcion = "Para trabajos profesionales de soldadura. Incluye careta y electrodos.",
             categoria = "Soldadura",
@@ -41,7 +41,7 @@ object HerramientasDataSource {
 
         ),
         Herramienta(
-            id = 7,
+            id = 7L,
             nombre = "Generador a Gasolina 3500W",
             descripcion = "Energía de respaldo para obras y emergencias",
             categoria = "Generadores",
