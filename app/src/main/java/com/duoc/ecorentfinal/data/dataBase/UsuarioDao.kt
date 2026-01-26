@@ -21,8 +21,11 @@ interface UsuarioDao {
 
     @Query("DELETE FROM usuarios WHERE id = :id")
     suspend fun deleteUsuario(id: Long)
+<<<<<<< HEAD
 
     @Query("SELECT * FROM usuarios")
     suspend fun getAllUsuarios(): List<UsuarioEntity>
 
+=======
+>>>>>>> 1b7d10893b4fc0f84ab139941c26bde6558eff6b
 }
