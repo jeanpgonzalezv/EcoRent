@@ -66,6 +66,22 @@ dependencies {
     // Corrutinas
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
+    // Retrofit para API
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // Gson para convertir JSON
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    // Logging Interceptor (opcional pero útil para debug)
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+
+    // PRUEBAS UNITARIAS
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("io.mockk:mockk:1.13.8")  // Para mockear dependencias
+    testImplementation("androidx.arch.core:core-testing:2.2.0")  // Para ViewModel
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

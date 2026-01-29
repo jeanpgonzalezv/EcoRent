@@ -92,13 +92,10 @@ fun EcoRentNavigation() {
                             costoTotal = costoTotal
                         )
 
-                        // ¡AGREGAR AL MISMO ViewModel!
                         carritoViewModel.agregarAlCarrito(nuevoItem)
 
-                        // Pequeño delay para asegurar que el estado se actualice
                         Thread.sleep(50) // Solo 50ms para no bloquear UI
 
-                        // Navegar al carrito
                         println("➡️➡️➡️ NAV: Navegando a carrito después de agregar")
                         navController.navigate("carrito") {
                             popUpTo("productos") { inclusive = false }

@@ -34,7 +34,7 @@ abstract class EcoRentDatabase : RoomDatabase() {
                     EcoRentDatabase::class.java,
                     "ecorent_database"
                 )
-                    .fallbackToDestructiveMigration()  // Borra y recrea si hay cambios
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

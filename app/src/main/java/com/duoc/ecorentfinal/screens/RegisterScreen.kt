@@ -48,17 +48,14 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
-    // Mensajes de error (en lugar de solo booleanos)
     var nombreError by remember { mutableStateOf<String?>(null) }
     var emailError by remember { mutableStateOf<String?>(null) }
     var telefonoError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
     var confirmPasswordError by remember { mutableStateOf<String?>(null) }
 
-    // AGREGAR ESTA VARIABLE:
     var generalError by remember { mutableStateOf<String?>(null) }
 
-    // EFFECT PARA OBSERVAR CAMBIOS:
     LaunchedEffect(registroState) {
         when (val state = registroState) {  // ← Declarar variable DENTRO del when
             is AuthViewModel.RegistroState.Success -> {

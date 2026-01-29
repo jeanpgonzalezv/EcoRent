@@ -1,6 +1,9 @@
 package com.duoc.ecorentfinal.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,104 +13,169 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.duoc.ecorentfinal.data.entities.HerramientasDataSource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.duoc.ecorentfinal.data.model.Herramienta
-
-import androidx.compose.ui.platform.LocalContext
-import android.content.Intent
-import android.net.Uri
-import androidx.compose.material3.TextButton
-
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import com.duoc.ecorentfinal.viewmodel.ProductosViewModel
+import androidx.compose.foundation.background
 
 @Composable
 fun ProductosScreen(
     onNavigateBack: () -> Unit,
     onArrendarHerramienta: (Long) -> Unit
 ) {
+    // Obtener ViewModel
+    val productosViewModel: ProductosViewModel = viewModel()
 
+    // Observar el estado
+    val productosState by productosViewModel.productosState.collectAsState()
 
-    val herramientas = HerramientasDataSource.herramientas
+    // Cargar datos al iniciar (solo una vez)
+    LaunchedEffect(Unit) {
+        productosViewModel.cargarHerramientas()
+    }
 
     Scaffold { innerPadding ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
-            item {
-                Column(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "🛠️ Herramientas Disponibles",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "${herramientas.size} productos en catálogo",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
+            when (productosState) {
+                is ProductosViewModel.ProductosState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator()
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text("📡 Cargando herramientas desde API...")
+                        }
+                    }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
 
-            // Lista de herramientas
-            items(herramientas) { herramienta ->
-                HerramientaCard(herramienta = herramienta,
-                    onArrendarHerramienta = onArrendarHerramienta)
-            }
+                is ProductosViewModel.ProductosState.Success -> {
+                    val herramientas = (productosState as ProductosViewModel.ProductosState.Success).herramientas
 
-            // Pie de página
-            item {
-                Column(
-                    modifier = Modifier
-                        .padding(vertical = 24.dp)
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Catálogo cargado desde colección de datos",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        // Título
+                        Text(
+                            text = "🛠️ Herramientas desde API",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(
-                        text = "Total: ${herramientas.size} herramientas",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f)
-                    )
+                        Text(
+                            text = "${herramientas.size} productos cargados desde API",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Lista de herramientas
+                        LazyColumn(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(herramientas) { herramienta ->
+                                HerramientaCard(
+                                    herramienta = herramienta,
+                                    onArrendarHerramienta = onArrendarHerramienta
+                                )
+                            }
+                        }
+                    }
+                }
+
+                is ProductosViewModel.ProductosState.Error -> {
+                    val error = (productosState as ProductosViewModel.ProductosState.Error).mensaje
+
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text("❌ Error al cargar datos",
+                                color = Color.Red,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold)
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(error,
+                                color = Color.Red.copy(alpha = 0.8f),
+                                textAlign = TextAlign.Center)
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Button(
+                                onClick = { productosViewModel.cargarHerramientas() },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Text("🔄 Reintentar")
+                            }
+                        }
+                    }
+                }
+
+                is ProductosViewModel.ProductosState.Empty -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text("📭 No hay herramientas disponibles",
+                                fontSize = 18.sp)
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Button(
+                                onClick = { productosViewModel.cargarHerramientas() },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Text("Cargar desde API")
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-
-// 3. Función REUTILIZABLE para mostrar cualquier herramienta
+// FUNCIÓN HerramientaCard
 @Composable
 fun HerramientaCard(
     herramienta: Herramienta,
@@ -127,61 +195,109 @@ fun HerramientaCard(
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            // Nombre
-            Text(
-                text = herramienta.nombre,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold
-            )
+            // Fila: Categoría + Rating
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Categoría con badge
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = "📦 ${herramienta.categoria}",
+                        fontSize = 10.sp,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
 
-            // Descripción
-            Text(
-                text = herramienta.descripcion,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.secondary
-            )
+                // Rating
+                Text(
+                    text = "⭐ ${herramienta.rating}",
+                    fontSize = 12.sp,
+                    color = Color(0xFFFF9800),
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Fila para precio y stock
+            // Nombre
+            Text(
+                text = herramienta.nombre,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Descripcion
+            Text(
+                text = herramienta.descripcion,
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.secondary,
+                lineHeight = 14.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Fila: Precio + Stock
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Precio
-                Text(
-                    text = herramienta.precioFormateado(),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Column {
+                    Text(
+                        text = "💰 Precio por día:",
+                        fontSize = 10.sp,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Text(
+                        text = herramienta.precioFormateado(),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
 
                 // Stock
-                Text(
-                    text = herramienta.stockFormateado(),
-                    fontSize = 12.sp,
-                    color = when {
-                        herramienta.disponible && herramienta.stock > 0 -> Color(0xFF4CAF50)
-                        herramienta.stock == 0 -> Color(0xFFF44336)
-                        else -> Color(0xFFFF9800)
-                    }
-                )
+                Column(
+                    horizontalAlignment = Alignment.End
+                ) {
+                    Text(
+                        text = "📦 Disponibilidad:",
+                        fontSize = 10.sp,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Text(
+                        text = if (herramienta.stock > 3) "🟢 En stock"
+                        else if (herramienta.stock > 0) "🟡 Últimas unidades"
+                        else "🔴 Agotado",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = when {
+                            herramienta.stock > 3 -> Color(0xFF4CAF50)
+                            herramienta.stock > 0 -> Color(0xFFFF9800)
+                            else -> Color(0xFFF44336)
+                        }
+                    )
+                }
             }
 
-            // Rating (si tiene)
-            if (herramienta.rating > 0.0f) {
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = "⭐ ${herramienta.rating}",
-                    fontSize = 11.sp,
-                    color = Color(0xFFFF9800)
-                )
-            }
-
-            // Botón Arrendar (SIEMPRE VISIBLE)
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Botón Arrendar
             Button(
                 onClick = { onArrendarHerramienta(herramienta.id) },
                 modifier = Modifier.fillMaxWidth(),
@@ -198,12 +314,12 @@ fun HerramientaCard(
                     text = if (herramienta.disponible && herramienta.stock > 0) {
                         "🛒 Arrendar ahora"
                     } else {
-                        "No disponible"
+                        "🚫 No disponible"
                     }
                 )
             }
 
-            // Enlace al fabricante (si tiene)
+            // Enlace al fabricante
             if (herramienta.fabricanteUrl.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -217,7 +333,7 @@ fun HerramientaCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "🌐 Especificaciones técnicas",
+                        text = "🌐 Ver especificaciones técnicas",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.primary
                     )
